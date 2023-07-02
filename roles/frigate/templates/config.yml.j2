@@ -1,0 +1,159 @@
+#jinja2: trim_blocks: False, lstrip_blocks: False
+# yaml-language-server: $schema=http://frigate.n1mtp.com:5000/api/config/schema.json
+# https://docs.frigate.video/configuration/
+logger:
+  default: info
+  logs:
+    frigate.mqtt: info
+
+mqtt:
+  host: {{ mqtt_host }}
+
+detectors:
+  coral1:
+    type: edgetpu
+    device: pci
+
+ffmpeg:
+  hwaccel_args: preset-vaapi
+  input_args: preset-rtsp-restream
+  output_args: 
+    record: preset-record-generic
+
+go2rtc:
+  webrtc:
+    candidates:
+      - {{ frigate_server_ip }}:8555
+  streams:
+    {%- if doorbell['enabled'] %}
+    doorbell:
+      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/h264Preview_01_sub
+    {%- endif +%}
+    {%- if doorbell['enabled'] %}
+    floodlight:
+      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}t@{{ floodlight['ip_address'] }}:554/h264Preview_01_sub
+    {%- endif +%}
+    {%- if deck['enabled'] %}
+    deck:
+      - rtsp://{{ deck['username'] }}:{{ deck_password }}t@{{ deck['ip_address'] }}:554/h264Preview_01_sub
+    {%- endif +%}
+
+record:
+  enabled: True
+  retain:
+    days: 7
+    mode: motion
+  events:
+    retain:
+      default: 14
+      mode: active_objects
+
+snapshots:
+  enabled: True
+  clean_copy: True
+  timestamp: True
+  bounding_box: False
+  retain:
+    default: 10
+
+objects:
+  track:
+    - car
+    - person
+    - cat
+
+cameras:
+  {%- if doorbell['enabled'] %}
+  doorbell:
+    enabled: true
+    objects:
+      track:
+        - car
+        - person
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/doorbell
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 640
+      height: 480
+      fps: 10
+    record:
+      events:
+        required_zones:
+          - doorbell_front_door
+          - doorbell_enter_driveway
+    motion:
+      mask:
+        - 640,314,640,0,0,0,0,254
+        - 128,261,171,275,0,303,0,272
+    zones:
+      doorbell_enter_driveway:
+        coordinates: 332,305,357,288,281,279,260,291
+      doorbell_driveway:
+        coordinates: 134,447,315,316,240,302,64,381
+      doorbell_front_door:
+        coordinates: 354,415,253,404,87,480,374,480
+        objects:
+          - person
+  {%- endif +%}
+
+  {%- if floodlight['enabled'] %}
+  floodlight:
+    enabled: true
+    objects:
+      track:
+        - car
+        - person
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/floodlight
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 1536
+      height: 576
+      fps: 10
+    record:
+      events:
+        required_zones:
+          - flood_enter_driveway
+          - flood_front_door
+    motion:
+      mask:
+        - 0,0,582,0,582,160,0,576
+        - 0,0,1536,0,1536,231,1230,219,834,173,0,272
+    zones:
+      flood_enter_driveway:
+        coordinates: 621,201,778,184,808,203,637,225
+      flood_driveway:
+        coordinates: 630,245,830,225,1093,428,652,554
+      flood_front_door:
+        coordinates: 1077,293,1257,233,1414,273,1354,457,1096,413,1034,372
+        objects:
+          - person
+  {%- endif +%}
+
+  {%- if deck['enabled'] %}
+  deck:
+    enabled: true
+    objects:
+      track:
+        - person
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/deck
+          roles:
+            - detect
+            - record
+    detect:
+      enabled: true
+      width: 896
+      height: 512
+      fps: 10
+  {%- endif +%}

@@ -1,0 +1,10 @@
+---
+- name: Install Software
+  ansible.builtin.import_tasks: software.yml
+  tags:
+    - software
+
+- name: Install and Configure Frigate
+  ansible.builtin.import_tasks: frigate.yml
+  tags:
+    - frigate

@@ -1,0 +1,76 @@
+---
+# the intel-media-va-driver-non-free package
+# requires non-free to be added to the apt sources.list
+- name: Install software
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - podman
+      - podman-compose
+      - gasket-dkms
+      - libabsl20220623
+      - libalgorithm-diff-perl
+      - libalgorithm-diff-xs-perl
+      - libalgorithm-merge-perl
+      - libaom3
+      - libdav1d6
+      - libgav1-1
+      - librav1e0
+      - libsvtav1enc1
+      - libjpeg62-turbo
+      - libyuv0
+      - libavif15
+      - libfontconfig1
+      - libde265-0
+      - libnuma1
+      - libx265-199
+      - libheif1
+      - libdeflate0
+      - libjbig0
+      - liblerc4
+      - libwebp7
+      - libtiff6
+      - libxpm4
+      - libgd3
+      - libc-devtools
+      - libfile-fcntllock-perl
+      - manpages-dev
+      - libedgetpu1-std
+      - libyaml-0-2
+      - python3-dotenv
+      - python3-yaml
+      - libva2
+      - libdrm-common
+      - libdrm2
+      - libpciaccess0
+      - libdrm-intel1
+      - i965-va-driver
+      - libigdgmm12
+      - intel-media-va-driver
+      - libdrm-amdgpu1
+      - libdrm-nouveau2
+      - libdrm-radeon1
+      - libz3-4
+      - libllvm15
+      - libva-drm2
+      - libwayland-client0
+      - libva-wayland2
+      - libx11-xcb1
+      - libxcb-dri3-0
+      - libxfixes3
+      - libva-x11-2
+      - libxcb-dri2-0
+      - libxcb-present0
+      - libxcb-sync1
+      - libxcb-xfixes0
+      - libxshmfence1
+      - mesa-va-drivers
+      - va-driver-all
+      - vainfo
+      - intel-media-va-driver-non-free
+      - tree
+      - wireguard-tools
+      - resolvconf
+      - libpcap0.8
+      - tcpdump

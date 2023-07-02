@@ -1,0 +1,57 @@
+---
+- name: Make frigate directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    mode: '0755'
+    owner: mike
+    group: mike
+    state: directory
+  loop:
+    - /frigate
+    - /frigate/config
+    - /frigate/storage
+
+- name: Get passwords
+  connection: local
+  ansible.builtin.set_fact:
+    deck_password: "{{ lookup('aws_ssm', '/frigate/deck', decrypt=True) }}"
+    doorbell_password: "{{ lookup('aws_ssm', '/frigate/doorbell', decrypt=True) }}"
+    floodlight_password: "{{ lookup('aws_ssm', '/frigate/floodlight', decrypt=True) }}"
+
+- name: Place frigate config
+  ansible.builtin.template:
+    src: config.yml.j2
+    dest: /frigate/config/config.yml
+    mode: '0644'
+    owner: mike
+    group: mike
+  notify:
+    - Restart frigate
+
+- name: Place frigate compose file
+  ansible.builtin.copy:
+    src: frigate-compose.yaml
+    dest: /frigate/frigate-compose.yaml
+    mode: '0644'
+    owner: mike
+    group: mike
+  notify:
+    - Restart frigate
+
+- name: Place frigate service file
+  become: true
+  ansible.builtin.copy:
+    src: frigate.service
+    dest: /etc/systemd/system/frigate.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Enable Frigate service
+  become: true
+  ansible.builtin.systemd:
+    name: frigate
+    enabled: true
+    state: started
+    daemon_reload: true
