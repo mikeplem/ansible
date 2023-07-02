@@ -26,6 +26,7 @@
     mode: '0644'
     owner: mike
     group: mike
+    backup: true
   notify:
     - Restart frigate
 
@@ -36,6 +37,7 @@
     mode: '0644'
     owner: mike
     group: mike
+    backup: true
   notify:
     - Restart frigate
 

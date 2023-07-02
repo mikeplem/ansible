@@ -29,13 +29,13 @@ go2rtc:
     doorbell:
       - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/h264Preview_01_sub
     {%- endif +%}
-    {%- if doorbell['enabled'] %}
+    {%- if floodlight['enabled'] %}
     floodlight:
-      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}t@{{ floodlight['ip_address'] }}:554/h264Preview_01_sub
+      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}@{{ floodlight['ip_address'] }}:554/h264Preview_01_sub
     {%- endif +%}
     {%- if deck['enabled'] %}
     deck:
-      - rtsp://{{ deck['username'] }}:{{ deck_password }}t@{{ deck['ip_address'] }}:554/h264Preview_01_sub
+      - rtsp://{{ deck['username'] }}:{{ deck_password }}@{{ deck['ip_address'] }}:554/h264Preview_01_sub
     {%- endif +%}
 
 record:
