@@ -4,9 +4,9 @@ mqtt_host: homeassistant.n1mtp.com
 frigate_server_ip: 192.168.1.209
 
 deck:
-  enabled: false
+  enabled: true
   username: admin
-  ip_address: 192.168.1.201
+  ip_address: 192.168.1.185
 
 doorbell:
   enabled: true
