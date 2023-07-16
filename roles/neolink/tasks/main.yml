@@ -40,10 +40,10 @@
     owner: root
     group: root
 
-- name: Enable neolink service
+- name: Disable neolink service
   become: true
   ansible.builtin.systemd:
     name: neolink
-    enabled: true
-    state: started
+    enabled: false
+    state: stopped
     daemon_reload: true
