@@ -1,0 +1,49 @@
+---
+- name: Make neolink directory
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    mode: '0755'
+    owner: mike
+    group: mike
+    state: directory
+  loop:
+    - /neolink
+
+- name: Get passwords
+  connection: local
+  ansible.builtin.set_fact:
+    floodlight_password: "{{ lookup('aws_ssm', '/frigate/floodlight', decrypt=True) }}"
+  tags:
+    - always
+
+- name: Place frigate config
+  ansible.builtin.template:
+    src: neolink.toml.j2
+    dest: /neolink/neolink.toml
+    mode: '0644'
+    owner: mike
+    group: mike
+    backup: true
+  notify:
+    - Restart neolink
+  tags:
+    - config
+    - toml
+
+- name: Place neolink service file
+  become: true
+  ansible.builtin.copy:
+    src: neolink.service
+    dest: /etc/systemd/system/neolink.service
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Enable neolink service
+  become: true
+  ansible.builtin.systemd:
+    name: neolink
+    enabled: true
+    state: started
+    daemon_reload: true

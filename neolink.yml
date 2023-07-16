@@ -1,0 +1,5 @@
+---
+- hosts: frigate
+  gather_facts: true
+  roles:
+    - neolink

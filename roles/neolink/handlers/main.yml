@@ -1,0 +1,8 @@
+---
+- name: Restart neolink
+  become: true
+  ansible.builtin.systemd:
+    name: neolink
+    enabled: true
+    state: restarted
+    daemon_reload: true
