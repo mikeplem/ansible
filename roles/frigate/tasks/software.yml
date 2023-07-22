@@ -74,3 +74,4 @@
       - resolvconf
       - libpcap0.8
       - tcpdump
+      - intel-gpu-tools
