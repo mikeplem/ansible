@@ -1,6 +1,12 @@
 #jinja2: trim_blocks: False, lstrip_blocks: False
 # yaml-language-server: $schema=http://frigate.n1mtp.com:5000/api/config/schema.json
 # https://docs.frigate.video/configuration/
+
+telemetry:
+  # Optional: Enable the latest version outbound check (default: shown below)
+  # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
+  version_check: True
+
 logger:
   default: info
   logs:
@@ -61,6 +67,32 @@ objects:
     - car
     - person
     - cat
+  filters:
+    person:
+      mask:
+        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
+        - 128,261,171,275,0,303,0,248
+        - 51,480,114,480,200,456,260,436,253,381,186,386,141,399
+    car:
+      mask:
+        - 0,0,582,0,582,160,0,576
+        - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
+        # this is from the doorbell and also watches the street
+        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
+
+motion:
+  # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
+  # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
+  # The value should be between 1 and 255.
+  ## threshold: 25
+  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: 30)
+  # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
+  # make motion detection more sensitive to smaller moving objects.
+  # As a rule of thumb:
+  #  - 15 - high sensitivity
+  #  - 30 - medium sensitivity
+  #  - 50 - low sensitivity
+  contour_area: 40
 
 cameras:
   {%- if doorbell['enabled'] %}
@@ -88,9 +120,9 @@ cameras:
           - doorbell_enter_driveway
     motion:
       mask:
-        - 640,314,640,0,0,0,0,254
+        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
         - 128,261,171,275,0,303,0,248
-        - 71,480,114,480,187,449,227,439,222,391,186,386,146,408
+        - 51,480,114,480,200,456,260,436,253,381,186,386,141,399
     zones:
       doorbell_enter_driveway:
         coordinates: 332,305,357,288,281,279,260,291
@@ -128,7 +160,7 @@ cameras:
     motion:
       mask:
         - 0,0,582,0,582,160,0,576
-        - 0,0,1536,0,1536,241,1222,231,894,208,807,171,667,181,616,216,0,357
+        - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
     zones:
       flood_enter_driveway:
         coordinates: 621,201,778,184,808,203,637,225
