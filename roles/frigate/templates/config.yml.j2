@@ -70,15 +70,12 @@ objects:
   filters:
     person:
       mask:
-        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
-        - 128,261,171,275,0,303,0,248
-        - 51,480,114,480,200,456,260,436,253,381,186,386,141,399
+        - 0,0,582,0,582,160,0,576
+        - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
     car:
       mask:
         - 0,0,582,0,582,160,0,576
         - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
-        # this is from the doorbell and also watches the street
-        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
 
 motion:
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
