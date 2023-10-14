@@ -46,9 +46,11 @@ go2rtc:
     {%- endif +%}
     {%- if deck['enabled'] %}
     deck:
-      - ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ deck['username'] }}&password={{ deck_password }}#video=copy#audio=copy#audio=opus
-    deck_sub:
-      - ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user={{ deck['username'] }}&password={{ deck_password }}
+      - rtsp://{{ deck['username'] }}:{{ deck_password }}@{{ deck['ip_address'] }}:554/h264Preview_01_sub
+      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ deck['username'] }}&password={{ deck_password }}#video=copy"
+      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ deck['username'] }}&password={{ deck_password }}#video=copy#audio=copy#audio=opus"
+    #deck_sub:
+      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user={{ deck['username'] }}&password={{ deck_password }}"
     {%- endif +%}
 
 record:
@@ -194,14 +196,19 @@ cameras:
         - person
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/deck?video=copy&audio=aac
-          input_args: preset-rtsp-restream
+        - path: rtsp://127.0.0.1:8554/deck
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/deck_sub?video=copy
-          input_args: preset-rtsp-restream
-          roles:
             - detect
+        #- path: rtsp://127.0.0.1:8554/deck?video=copy&audio=aac
+        ## - path: rtsp://127.0.0.1:8554/deck?video=copy
+        ##   input_args: preset-rtsp-restream
+        ##   roles:
+        ##     - record
+        ## - path: rtsp://127.0.0.1:8554/deck_sub?video=copy
+        ##   input_args: preset-rtsp-restream
+        ##   roles:
+        ##     - detect
     detect:
       enabled: true
       width: 640
