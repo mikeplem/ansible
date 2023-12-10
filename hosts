@@ -3,3 +3,6 @@ frigate.n1mtp.com
 
 [hass]
 homeassistant.n1mtp.com
+
+[nextcloud]
+nextcloud.n1mtp.com

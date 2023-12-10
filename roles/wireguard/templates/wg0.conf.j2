@@ -1,0 +1,14 @@
+[Interface]
+Address = {{ wg_ip }}/32
+PrivateKey = {{ wg_client_json['private'] }}
+DNS = 100.64.1.1
+
+[Peer]
+PublicKey = {{ wg_server_json['public'] }}
+Endpoint = 3.130.146.187:51820
+AllowedIPs = 100.64.1.0/24
+
+# This is for if you're behind a NAT and
+# want the connection to be kept alive.
+PersistentKeepalive = 25
+

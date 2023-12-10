@@ -1,0 +1,2 @@
+wg_param: '/wireguard/frigate'
+wg_ip: '100.64.1.8'
