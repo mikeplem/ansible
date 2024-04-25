@@ -1,0 +1,16 @@
+<html>
+<head>
+  <title>Wake On Lan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=2" />
+</head>
+<body>
+  <form method="POST" action="/cgi-bin/wol.sh">
+    <select name="macaddress" id="macaddress">
+    {% for mac in mac_addresses %}
+      <option value="{{ mac['address'] | replace(':', '_') }}">{{ mac['name'] }}</option>
+    {% endfor %}
+    </select>
+  <p/>
+  <input type="submit" value="Turn on computer">
+  </form>
+</body>

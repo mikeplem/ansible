@@ -1,0 +1,7 @@
+---
+- name: restart lighttpd
+  systemd:
+    name: lighttpd
+    state: restarted
+    enabled: true
+    daemon_reload: yes

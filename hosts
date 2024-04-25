@@ -6,3 +6,6 @@ homeassistant.n1mtp.com
 
 [nextcloud]
 nextcloud.n1mtp.com
+
+[wol]
+wol.local

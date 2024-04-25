@@ -1,0 +1,67 @@
+---
+- name: Get HOME path
+  connection: local
+  ansible.builtin.set_fact:
+    home_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}"
+
+# wol_mac.json file structure
+# [
+#   {
+#     "name": "DISPLAY_NAME_1",
+#     "address": "MAC_ADDRESS_1"
+#   },
+#   {
+#     "name": "DISPLAY_NAME_2",
+#     "address": "MAC_ADDRESS_2"
+#   }
+# ]
+
+- name: Read in MAC addresses
+  connection: local
+  ansible.builtin.set_fact:
+    mac_addresses: "{{ lookup('ansible.builtin.file', '{{ home_dir }}/wol_mac.json') | from_json }}"
+
+- name: Install software
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - lighttpd
+      - wakeonlan
+
+- name: Copy custom config
+  become: true
+  ansible.builtin.copy:
+    src: 99-custom.conf
+    dest: /etc/lighttpd/conf-available/99-custom.conf
+  notify: restart lighttpd
+
+- name: Create custom symlink
+  become: true
+  ansible.builtin.file:
+    state: link
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    force: true
+  loop:
+    - { src: '/etc/lighttpd/conf-available/99-custom.conf', dest: '/etc/lighttpd/conf-enabled/99-custom.conf' }
+    - { src: '/etc/lighttpd/conf-available/10-cgi.conf', dest: '/etc/lighttpd/conf-enabled/10-cgi.conf' }
+  notify: restart lighttpd
+
+- name: Place Wake On Lan HTML
+  become: true
+  ansible.builtin.template:
+    src: wol.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: 0644
+
+- name: Place Wake On Lan CGI
+  become: true
+  ansible.builtin.copy:
+    src: wol.sh
+    dest: /usr/lib/cgi-bin/wol.sh
+    owner: www-data
+    group: www-data
+    mode: 0755
