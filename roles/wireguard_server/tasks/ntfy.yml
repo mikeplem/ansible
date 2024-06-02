@@ -1,0 +1,29 @@
+---
+- name: Copy ntfy server config
+  ansible.builtin.copy:
+    src: ntfy_server.yml
+    dest: /etc/ntfy/server.yml
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart ntfy
+
+- name: Copy custom nginx.conf
+  ansible.builtin.copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    mode: 0644
+    owner: root
+    group: root
+    backup: yes
+
+- name: Copy ntfy nginx proxy config
+  ansible.builtin.copy:
+    src: ntfy_nginx.conf
+    dest: /etc/nginx/conf.d/ntfy.conf
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart nginx

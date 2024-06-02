@@ -1,0 +1,27 @@
+---
+- import_tasks: system.yml
+  become: yes
+  tags:
+    - system
+
+- import_tasks: software.yml
+  become: yes
+  tags:
+    - software
+
+- import_tasks: wg.yml
+  become: yes
+  tags:
+    - wg
+    - wireguard
+
+- import_tasks: dnsmasq.yml
+  become: yes
+  tags:
+    - dns
+    - dnsmasq
+
+- import_tasks: ntfy.yml
+  become: yes
+  tags:
+    - ntfy

@@ -9,3 +9,6 @@ nextcloud.n1mtp.com
 
 [wol]
 wol.local
+
+[wg_server]
+wireguard.wg

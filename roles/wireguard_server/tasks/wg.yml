@@ -1,0 +1,25 @@
+---
+# - name: Get wireguard info
+#   connection: local
+#   ansible.builtin.set_fact:
+#     wg_client_json: "{{ lookup('aws_ssm', wg_param, decrypt=True) }}"
+#     wg_server_json: "{{ lookup('aws_ssm', '/wireguard/wireguard', decrypt=True) }}"
+
+# - name: Place wireguard client config
+#   become: true
+#   ansible.builtin.template:
+#     src: wg0.conf.j2
+#     dest: /etc/wireguard/wg0.conf
+#     owner: root
+#     group: root
+#     mode: 0600
+#     backup: yes
+#   notify: restart wireguard
+
+# - name: Start and enable wireguard
+#   become: true
+#   ansible.builtin.systemd:
+#     name: wg-quick@wg0
+#     state: started
+#     enabled: true
+#     daemon_reload: yes

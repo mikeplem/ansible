@@ -1,0 +1,5 @@
+---
+- hosts: wg_server
+  gather_facts: true
+  roles:
+    - wireguard_server
