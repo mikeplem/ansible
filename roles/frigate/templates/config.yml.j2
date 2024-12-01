@@ -5,7 +5,7 @@
 telemetry:
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
-  version_check: True
+  version_check: true
 
 logger:
   default: info
@@ -23,7 +23,7 @@ detectors:
 ffmpeg:
   hwaccel_args: preset-vaapi
   input_args: preset-rtsp-restream
-  output_args: 
+  output_args:
     record: preset-record-generic
 
 go2rtc:
@@ -54,7 +54,7 @@ go2rtc:
     {%- endif +%}
 
 record:
-  enabled: True
+  enabled: true
   retain:
     days: 7
     mode: motion
@@ -64,10 +64,10 @@ record:
       mode: active_objects
 
 snapshots:
-  enabled: True
-  clean_copy: True
-  timestamp: True
-  bounding_box: False
+  enabled: true
+  clean_copy: true
+  timestamp: true
+  bounding_box: false
   retain:
     default: 10
 
@@ -76,29 +76,6 @@ objects:
     - car
     - person
     - cat
-  filters:
-    person:
-      mask:
-        - 0,0,582,0,582,160,0,576
-        - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
-    car:
-      mask:
-        - 0,0,582,0,582,160,0,576
-        - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
-
-motion:
-  # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
-  # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
-  # The value should be between 1 and 255.
-  ## threshold: 25
-  # Optional: Minimum size in pixels in the resized motion image that counts as motion (default: 30)
-  # Increasing this value will prevent smaller areas of motion from being detected. Decreasing will
-  # make motion detection more sensitive to smaller moving objects.
-  # As a rule of thumb:
-  #  - 15 - high sensitivity
-  #  - 30 - medium sensitivity
-  #  - 50 - low sensitivity
-  #contour_area: 40
 
 cameras:
   {%- if doorbell['enabled'] %}
@@ -123,25 +100,34 @@ cameras:
       width: 640
       height: 480
       fps: 10
-    record:
-      events:
-        required_zones:
-          - doorbell_front_door
-          - doorbell_enter_driveway
     motion:
       mask:
-        - 640,0,640,338,337,318,345,298,274,291,244,303,0,270,0,0
-        - 128,261,171,275,0,303,0,248
-        - 51,480,114,480,200,456,260,436,253,381,186,386,141,399
+        - 1,0,1,0.704,0.527,0.662,0.539,0.621,0.428,0.606,0.381,0.631,0,0.562,0,0
+        - 0.068,0.577,0.176,0.599,0,0.631,0,0.562
+      threshold: 55
+      contour_area: 70
+      improve_contrast: true
     zones:
       doorbell_enter_driveway:
         coordinates: 332,305,357,288,281,279,260,291
       doorbell_driveway:
-        coordinates: 134,447,315,316,240,302,64,381
-      doorbell_front_door:
-        coordinates: 347,427,293,407,274,423,183,447,134,480,374,480
+        coordinates: 0.209,0.931,0.492,0.658,0.375,0.629,0.1,0.794
+        inertia: 3
+        loitering_time: 0
         objects:
+          - car
           - person
+      doorbell_front_door:
+        coordinates: 0.563,0.872,0.458,0.848,0.383,0.87,0.263,0.898,0.166,1,0.584,1
+        objects: person
+        inertia: 10
+        loitering_time: 3
+    review:
+      alerts:
+        required_zones:
+          - doorbell_front_door
+          - doorbell_driveway
+      detections: {}
   {%- endif +%}
 
   {%- if floodlight['enabled'] %}
@@ -154,38 +140,42 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/floodlight
-        #- path: rtsp://127.0.0.1:8554/floodlight?video=copy&audio=aac
           input_args: preset-rtsp-restream
           roles:
             - record
             - detect
-        ## - path: rtsp://127.0.0.1:8554/floodlight_sub?video=copy
-        ##   input_args: preset-rtsp-restream
-        ##   roles:
-        ##     - detect
+        #- path: rtsp://127.0.0.1:8554/floodlight_sub
+        #  input_args: preset-rtsp-restream
+        #  roles:
+        #    - detect
     detect:
       enabled: true
       width: 1536
       height: 576
       fps: 10
-    record:
-      events:
-        required_zones:
-          - flood_enter_driveway
-          - flood_front_door
     motion:
       mask:
         - 0,0,582,0,582,160,0,576
         - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
+      threshold: 30
+      contour_area: 49
+      improve_contrast: true
     zones:
       flood_enter_driveway:
         coordinates: 621,201,778,184,808,203,637,225
       flood_driveway:
         coordinates: 630,245,830,225,1093,428,652,554
       flood_front_door:
-        coordinates: 1135,219,1257,233,1414,273,1299,529,1096,413,1034,372
-        objects:
-          - person
+        coordinates: 0.723,0.358,0.818,0.405,0.933,0.481,0.842,0.982,0.709,0.754,0.667,0.607
+        objects: person
+        inertia: 3
+        loitering_time: 0
+    review:
+      alerts:
+        required_zones:
+          - flood_enter_driveway
+          - flood_front_door
+          - flood_driveway
   {%- endif +%}
 
   {%- if deck['enabled'] %}
@@ -214,4 +204,22 @@ cameras:
       width: 640
       height: 360
       fps: 10
+    zones:
+      backyard:
+        coordinates:
+          0.009,0.497,0.23,0.331,0.417,0.259,0.52,0.215,0.984,0.406,0.992,0.985,0.093,0.984
+        inertia: 5
+        loitering_time: 5
+        objects: person
+    review:
+      alerts:
+        required_zones: backyard
+      detections: {}
+    motion:
+      threshold: 30
+      contour_area: 55
+      improve_contrast: true
+      mask: 0.006,0.009,0.005,0.156,0.998,0.174,0.995,0.005
   {%- endif +%}
+
+version: 0.14
