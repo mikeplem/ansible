@@ -33,24 +33,21 @@ go2rtc:
   streams:
     {%- if doorbell['enabled'] %}
     doorbell:
-      - ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}#video=copy#audio=copy#audio=opus
+      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}/Preview_01_main
     doorbell_sub:
-      - ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}
+      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}/Preview_01_sub
     {%- endif +%}
     {%- if floodlight['enabled'] %}
     floodlight:
-      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}@{{ floodlight['ip_address'] }}:554/h264Preview_01_sub
-      #- ffmpeg:https://{{ floodlight['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ floodlight['username'] }}&password={{ floodlight_password }}#video=copy#audio=copy#audio=opus
-    #floodlight_sub:
-      #- ffmpeg:https://{{ floodlight['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user={{ floodlight['username'] }}&password={{ floodlight_password }}
+      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}@{{ floodlight['ip_address'] }}:554/h265Preview_01_sub
+    floodlight_sub:
+      - rtsp://{{ floodlight['username'] }}:{{ floodlight_password }}@{{ floodlight['ip_address'] }}:554/h265Preview_01_sub
     {%- endif +%}
     {%- if deck['enabled'] %}
     deck:
-      - rtsp://{{ deck['username'] }}:{{ deck_password }}@{{ deck['ip_address'] }}:554/h264Preview_01_sub
-      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ deck['username'] }}&password={{ deck_password }}#video=copy"
-      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ deck['username'] }}&password={{ deck_password }}#video=copy#audio=copy#audio=opus"
-    #deck_sub:
-      #- "ffmpeg:https://{{ deck['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user={{ deck['username'] }}&password={{ deck_password }}"
+      - rtsp://{{ deck['username'] }}:{{ deck_password }}@{{ deck['ip_address'] }}:554/Preview_01_main
+    deck_sub:
+      - rtsp://{{ deck['username'] }}:{{ deck_password }}@{{ deck['ip_address'] }}:554/Preview_01_sub
     {%- endif +%}
 
 record:
@@ -85,13 +82,19 @@ cameras:
       track:
         - car
         - person
+      filters:
+        car:
+          mask:
+            - 0.252,0.486,0.253,0.528,0.455,0.529,0.449,0.461
+            - 0.56,0.51,0.559,0.551,0.66,0.549,0.655,0.498
+            - 0.732,0.497,0.724,0.557,0.901,0.568,0.895,0.504
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/doorbell?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/doorbell
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/doorbell_sub?video=copy
+        - path: rtsp://127.0.0.1:8554/doorbell_sub
           input_args: preset-rtsp-restream
           roles:
             - detect
@@ -137,17 +140,20 @@ cameras:
       track:
         - car
         - person
+      filters:
+        car: {}
+        person: {}
+      mask: 0.568,0.309,0.815,0.354,0.898,0.305,0.902,0.013,0.55,0.006
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/floodlight
           input_args: preset-rtsp-restream
           roles:
             - record
-            - detect
-        #- path: rtsp://127.0.0.1:8554/floodlight_sub
-        #  input_args: preset-rtsp-restream
-        #  roles:
-        #    - detect
+        - path: rtsp://127.0.0.1:8554/floodlight_sub
+          input_args: preset-rtsp-restream
+          roles:
+           - detect
     detect:
       enabled: true
       width: 1536
@@ -157,7 +163,7 @@ cameras:
       mask:
         - 0,0,582,0,582,160,0,576
         - 0,0,1536,0,1536,241,1222,231,822,235,751,187,641,194,619,233,0,357
-      threshold: 30
+      threshold: 50
       contour_area: 49
       improve_contrast: true
     zones:
@@ -187,18 +193,13 @@ cameras:
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/deck
+          input_args: preset-rtsp-restream
           roles:
             - record
+        - path: rtsp://127.0.0.1:8554/deck_sub
+          input_args: preset-rtsp-restream
+          roles:
             - detect
-        #- path: rtsp://127.0.0.1:8554/deck?video=copy&audio=aac
-        ## - path: rtsp://127.0.0.1:8554/deck?video=copy
-        ##   input_args: preset-rtsp-restream
-        ##   roles:
-        ##     - record
-        ## - path: rtsp://127.0.0.1:8554/deck_sub?video=copy
-        ##   input_args: preset-rtsp-restream
-        ##   roles:
-        ##     - detect
     detect:
       enabled: true
       width: 640
@@ -206,7 +207,7 @@ cameras:
       fps: 10
     zones:
       backyard:
-        coordinates:
+        coordinates: 
           0.009,0.497,0.23,0.331,0.417,0.259,0.52,0.215,0.984,0.406,0.992,0.985,0.093,0.984
         inertia: 5
         loitering_time: 5
@@ -221,5 +222,4 @@ cameras:
       improve_contrast: true
       mask: 0.006,0.009,0.005,0.156,0.998,0.174,0.995,0.005
   {%- endif +%}
-
 version: 0.14
