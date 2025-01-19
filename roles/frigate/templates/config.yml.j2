@@ -21,7 +21,10 @@ detectors:
     device: pci
 
 ffmpeg:
-  hwaccel_args: preset-rpi-64-h264 # preset-rpi-64-h265
+  hwaccel_args:
+    - -c:v:1
+    # - hevc_v4l2m2m
+    - h264_v4l2m2m
   input_args: preset-rtsp-restream
   output_args:
     record: preset-record-generic
@@ -33,8 +36,8 @@ go2rtc:
   streams:
     {%- if doorbell['enabled'] %}
     doorbell:
-      - ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}#video=copy#audio=copy#audio=opus
-      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/Preview_01_sub
+      #- ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}#video=copy#audio=copy#audio=opus
+      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/Preview_01_main
     doorbell_sub:
       - ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}
     {%- endif +%}
@@ -57,10 +60,10 @@ record:
   # this should be disabled almost all the time
   # it is very CPU intensive
   # https://docs.frigate.video/configuration/record/#syncing-recordings-with-disk
-  sync_recordings: false
+  sync_recordings: true
   retain:
     days: 7
-    mode: motion
+    mode: active_objects
   events:
     retain:
       default: 14
@@ -80,6 +83,11 @@ objects:
     - person
     - cat
 
+detect:
+ stationary:
+  interval: 50
+  threshold: 50
+
 cameras:
   {%- if doorbell['enabled'] %}
   doorbell:
@@ -89,20 +97,8 @@ cameras:
         - car
         - person
       filters:
-        car:
-          mask:
-            - 0.479,0.5,0.469,0.548,0.66,0.549,0.655,0.498
-            - 0.732,0.497,0.724,0.565,1,0.586,0.988,0.512
-            - 0.127,0.479,0.131,0.558,0.19,0.564,0.183,0.469
-            - 0.233,0.48,0.233,0.539,0.428,0.552,0.447,0.479
-            - 0.006,0.475,0.046,0.49,0.049,0.52,0.009,0.522
-            - 0.127,0.479,0.131,0.558,0.19,0.564,0.183,0.469
-            - 0.233,0.48,0.233,0.539,0.428,0.552,0.447,0.479
-            - 0.006,0.475,0.046,0.49,0.049,0.52,0.009,0.522
-      mask:
-        - 0.127,0.479,0.131,0.558,0.19,0.564,0.183,0.469
-        - 0.233,0.48,0.233,0.539,0.428,0.552,0.447,0.479
-        - 0.006,0.475,0.046,0.49,0.049,0.52,0.009,0.522
+        car: {}
+      mask: 0,0.463,0,0.552,1,0.635,1,0.513
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/doorbell
@@ -115,24 +111,28 @@ cameras:
             - detect
     detect:
       enabled: true
-      width: 896
-      height: 672
-      fps: 5
+      width: 640
+      height: 480
+      fps: 10
     motion:
       mask:
         - 1,0,1,0.704,0.527,0.662,0.539,0.621,0.428,0.606,0.381,0.631,0,0.562,0,0
         - 0.068,0.577,0.176,0.599,0,0.631,0,0.562
-      threshold: 10
-      contour_area: 10
+      threshold: 30
+      contour_area: 75
       lightning_threshold: 1.0
       improve_contrast: 'true'
     zones:
       doorbell_driveway:
-        coordinates: 
-          0.017,0.833,0.424,0.615,0.539,0.628,0.475,0.729,0.619,0.782,0.543,0.994,0.056,0.986
-        loitering_time: 0
+        coordinates: 0.475,0.729,0.619,0.782,0.543,0.994,0.074,1,0,0.838,0.289,0.657
+        loitering_time: 2
+        inertia: 3
+        objects: person
     review:
-      detections: {}
+      detections:
+        required_zones: doorbell_driveway
+      alerts:
+        required_zones: doorbell_driveway
   {%- endif +%}
 
   {%- if floodlight['enabled'] %}
@@ -145,13 +145,9 @@ cameras:
       filters:
         car: {}
         person:
-          mask:
-            - 0.119,0.402,0.124,0.482,0.163,0.451,0.153,0.382
-            - 0.533,0.035,0.544,0.305,0.563,0.312,0.573,0.235,0.668,0.26,0.69,0.322,0.892,0.389,0.889,0.023
-            - 0.189,0.283,0.189,0.386,0.322,0.303,0.319,0.215
-            - 0.419,0.19,0.42,0.254,0.48,0.244,0.478,0.18
+          mask: 0.119,0.402,0.124,0.482,0.163,0.451,0.153,0.382
       mask:
-        - 0.533,0.035,0.544,0.305,0.563,0.312,0.573,0.235,0.668,0.26,0.689,0.354,0.892,0.405,0.889,0.023
+        - 0.533,0.035,0.544,0.305,0.892,0.405,0.889,0.023
         - 0.189,0.283,0.189,0.386,0.322,0.303,0.319,0.215
         - 0.419,0.19,0.42,0.254,0.48,0.244,0.478,0.18
         - 0.01,0.405,0.12,0.35,0.131,0.418,0.003,0.482
@@ -196,7 +192,10 @@ cameras:
         required_zones:
           - flood_enter_driveway
           - flood_front_door
+      detections:
+        required_zones:
           - flood_driveway
+          - flood_front_door
   {%- endif +%}
 
   {%- if deck['enabled'] %}
@@ -225,8 +224,8 @@ cameras:
       fps: 10
     zones:
       backyard:
-        coordinates: 
-          0.009,0.497,0.23,0.331,0.417,0.259,0.52,0.215,0.984,0.406,0.992,0.985,0.093,0.984
+        coordinates:
+          0.009,0.497,0.23,0.331,0.417,0.259,0.483,0.221,0.979,0.453,0.992,0.985,0.093,0.984
         inertia: 5
         loitering_time: 5
         objects: person
