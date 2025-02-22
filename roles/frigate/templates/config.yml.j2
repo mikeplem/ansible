@@ -40,7 +40,8 @@ go2rtc:
       #- ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}#video=copy#audio=copy#audio=opus
       - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/Preview_01_main
     doorbell_sub:
-      - ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}
+      #- ffmpeg:https://{{ doorbell['ip_address'] }}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={{ doorbell['username'] }}&password={{ doorbell_password }}
+      - rtsp://{{ doorbell['username'] }}:{{ doorbell_password }}@{{ doorbell['ip_address'] }}:554/Preview_01_sub
     {%- endif +%}
     {%- if floodlight['enabled'] %}
     floodlight:
@@ -64,13 +65,17 @@ record:
   sync_recordings: true
   retain:
     days: 7
-    mode: active_objects
+    #mode: active_objects
+    mode: motion
   alerts:
     retain:
       days: 14
+      mode: motion
   detections:
     retain:
       days: 14
+      mode: motion
+
 snapshots:
   enabled: true
   clean_copy: true
