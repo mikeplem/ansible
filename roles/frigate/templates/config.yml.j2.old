@@ -65,12 +65,11 @@ record:
   retain:
     days: 7
     mode: active_objects
-  alerts:
+  events:
     retain:
-      days: 14
-  detections:
-    retain:
-      days: 14
+      default: 14
+      mode: active_objects
+
 snapshots:
   enabled: true
   clean_copy: true
@@ -86,9 +85,9 @@ objects:
     - cat
 
 detect:
-  stationary:
-    interval: 50
-    threshold: 50
+ stationary:
+  interval: 50
+  threshold: 50
 
 cameras:
   {%- if doorbell['enabled'] %}
@@ -239,8 +238,6 @@ cameras:
       threshold: 30
       contour_area: 55
       improve_contrast: true
-      mask:
-        - 0.006,0.009,0.005,0.156,0.998,0.174,0.995,0.005
-        - 0.745,0.683,0.781,0.012,0.886,0.018,0.838,0.699
+      mask: 0.006,0.009,0.005,0.156,0.998,0.174,0.995,0.005
   {%- endif +%}
-version: 0.15-1
+version: 0.14
